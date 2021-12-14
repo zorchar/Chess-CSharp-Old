@@ -382,6 +382,7 @@ namespace chess
             public Piece[,] grid = new Piece[8, 8];
             public Board()
             {
+                /*
                 grid[0, 0] = new Rook(this, false);
                 grid[0, 1] = new Knight(this, false);
                 grid[0, 2] = new Bishop(this, false);
@@ -402,6 +403,12 @@ namespace chess
                     grid[1, j] = new Pawn(this, false);
                 for (int j = 0; j < 8; j++)
                     grid[6, j] = new Pawn(this, true);
+                */
+                grid[7, 4] = new King(this, true, 7, 4);
+                grid[0, 4] = new King(this, false, 0, 4);
+                grid[4, 5] = new Pawn(this, false);
+                grid[6, 4] = new Pawn(this, true);
+
             }
             public int getEnPassantSquareX() { return enPassantSquareX; }
             public void setEnPassantSquareX(int x) { enPassantSquareX = x; }
@@ -423,7 +430,7 @@ namespace chess
                 xNew = int.Parse("" + input[2]);
                 yNew = int.Parse("" + input[3]);
             }
-            public void moveRookToCompleteCastling(bool isReverse)
+            public void moveRookToCompleteOrReverseCastling(bool isReverse)
             {
                 if (yOld - yNew == 2)
                 {
@@ -660,56 +667,50 @@ namespace chess
                     return true;
                 return false;
             }
-            public void MovePiece()
-            {
-                grid[xNew, yNew] = grid[xOld, yOld];
-                grid[xOld, yOld] = null;
-            }
             public void makeMove(int xOld, int yOld, int xNew, int yNew)
             {
                 isEnPassantAvailiable = false;
                 UpdateLastRemovedPiece(xNew, yNew);
-                MovePiece();
-                //added stuff for en passant
+                grid[xNew, yNew] = grid[xOld, yOld];
+                grid[xOld, yOld] = null;
                 //if is pawn
-                if (grid[xOld, yOld] is Pawn)
+                if (grid[xNew, yNew] is Pawn)
                 {
                     //if did a double move
-                    if (xOld - xNew == (grid[xOld, yOld].isWhite ? 2 : -2))
-                        SetEnPassantProperties(xNew + (grid[xOld, yOld].isWhite ? 1 : -1), yNew, true);
+                    if (xOld - xNew == (grid[xNew, yNew].isWhite ? 2 : -2))
+                        SetEnPassantProperties(xNew + (getCurrentTurn() ? 1 : -1), yNew, true);
                     //if made attacking move(sideways) and attacked empty square - means it's en passant
-                    else if (Math.Abs(yNew - yOld) == 1 && grid[xNew, yNew] == null)
+                    else if (Math.Abs(yNew - yOld) == 1 && lastRemovedPiece == null)
                     {
-                        UpdateLastRemovedPiece(xNew + (grid[xOld, yOld].isWhite ? 1 : -1), yNew);
-                        grid[xNew + (grid[xOld, yOld].isWhite ? 1 : -1), yNew] = null;
+                        UpdateLastRemovedPiece(xNew + (getCurrentTurn() ? 1 : -1), yNew);
+                        grid[xNew + (getCurrentTurn() ? 1 : -1), yNew] = null;
                     }
                 }
-                else if (grid[xOld, yOld] is King)
+                else if (grid[xNew, yNew] is King)
                 {
                     UpdateKingPosition(xNew,yNew);
                     if (grid[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
-                        moveRookToCompleteCastling(false);
+                        moveRookToCompleteOrReverseCastling(false);
                 }
             }
             public void reverseLastMove(int xOld, int yOld, int xNew, int yNew)
             {
+                grid[xOld, yOld] = grid[xNew, yNew];
+                grid[xNew, yNew] = lastRemovedPiece;
                 //if is pawn and if made attacking move(sideways) and attacked different square from last piece location - means it's an passant
-                if (grid[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1&& !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
+                if (grid[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1 && !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
                 {
-                        isEnPassantAvailiable = true;
-                        grid[xNew + (grid[xNew, yNew].isWhite ? 1 : -1), yNew] = lastRemovedPiece;
-                        grid[xOld, yOld] = grid[xNew, yNew];
-                        grid[xNew, yNew] = null;
-                        return;
+                    isEnPassantAvailiable = true;
+                    grid[xNew + (grid[xNew, yNew].isWhite ? 1 : -1), yNew] = lastRemovedPiece;
+                    lastRemovedPiece = null;
+                    grid[xNew, yNew] = null;
                 }
-                else if (grid[xOld, yOld] is King)
+                else if (grid[xNew, yNew] is King)
                 {
                     UpdateKingPosition(xOld, yOld);
                     if (grid[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
-                        moveRookToCompleteCastling(true);
+                        moveRookToCompleteOrReverseCastling(true);
                 }
-                grid[xOld, yOld] = grid[xNew, yNew];
-                grid[xNew, yNew] = lastRemovedPiece;
             }
             public void addPositionStringToArray()
             {
@@ -799,7 +800,7 @@ namespace chess
                 // check every square
                 for (int i = 0; i < 8; i++)
                     for (int j = 0; j < 8; j++)
-                        // if there is a piece on square
+                        // if there is an opponent's piece on square
                         if (grid[i, j] != null && this.grid[i, j].isWhite == isWhite)
                             // check every possible square
                             for (int k = 0; k < 8; k++)
@@ -812,17 +813,13 @@ namespace chess
                                         if (!checkIfKingIsInCheck(false, isWhite))
                                         {
                                             reverseLastMove(i, j, k, l);
-                                            isEnPassantAvailiable = enPassantState; // not sure 100% - meanwhile no bugs found
-                                            lastRemovedPieceX = lastPieceX;
-                                            lastRemovedPieceY = lastPieceY;
-                                            lastRemovedPiece = grid[lastPieceX, lastPieceY];
+                                            isEnPassantAvailiable = enPassantState; // not sure 100% - meanwhile no bugs found ---- later update - check if needed or take out of reverse and make move
+                                            UpdateLastRemovedPiece(lastPieceX, lastPieceY);
                                             return true;
                                         }
                                         reverseLastMove(i, j, k, l);
                                         isEnPassantAvailiable = enPassantState; // not sure 100 % -meanwhile no bugs found
-                                        lastRemovedPieceX = lastPieceX;
-                                        lastRemovedPieceY = lastPieceY;
-                                        lastRemovedPiece = grid[lastPieceX, lastPieceY];
+                                        UpdateLastRemovedPiece(lastPieceX, lastPieceY);
                                     }
                 return false;
             }

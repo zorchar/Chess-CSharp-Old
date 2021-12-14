@@ -162,7 +162,6 @@ namespace chess
         }
         class Knight : Piece
         {
-            //fguhky,u
             public Knight(Board board, bool isWhite) : base(board, isWhite ? 'N' : 'n', isWhite) { }
             public override bool checkLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
             {

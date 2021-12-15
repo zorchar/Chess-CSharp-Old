@@ -5,7 +5,7 @@ namespace chess
     {
         static void Main(string[] args)
         {
-            new Board().PlayGame();
+            new Game().PlayGame();
         }
         static bool IsInputValid(string input)
         {
@@ -40,13 +40,13 @@ namespace chess
         }
         class Piece
         {
-            public char sign; // 1 is black king, 2 is black queen...
+            public char sign;
             public bool isWhite;
-            public Board board;
+            public Game game;
             public Piece() { }
-            public Piece(Board board, char sign, bool isWhite)
+            public Piece(Game game, char sign, bool isWhite)
             {
-                this.board = board;
+                this.game = game;
                 this.sign = sign;
                 this.isWhite = isWhite;
             }
@@ -55,7 +55,7 @@ namespace chess
         }
         class Knight : Piece
         {
-            public Knight(Board board, bool isWhite) : base(board, isWhite ? 'N' : 'n', isWhite)
+            public Knight(Game game, bool isWhite) : base(game, isWhite ? 'N' : 'n', isWhite)
             { }
             public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
             {
@@ -67,7 +67,7 @@ namespace chess
                     return false;
                 }
                 // check if square is empty or has rival
-                if (board.IsSquareOpponent(xNew, yNew) || board.IsSquareEmpty(xNew, yNew))
+                if (game.IsSquareOpponent(xNew, yNew) || game.IsSquareEmpty(xNew, yNew))
                     return true;
                 if (displayReason)
                     Console.WriteLine("Illegal move. Can't take own piece.");
@@ -76,7 +76,7 @@ namespace chess
         }
         class Rook : Piece
         {
-            public Rook(Board board, bool isWhite) : base(board, isWhite ? 'R' : 'r', isWhite)
+            public Rook(Game game, bool isWhite) : base(game, isWhite ? 'R' : 'r', isWhite)
             { }
             public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
             {
@@ -100,7 +100,7 @@ namespace chess
                 int i = xOld + xStep, j = yOld + yStep;
                 while (i < 8 && j < 8 && (i != xNew || j != yNew))
                 {
-                    if (!board.IsSquareEmpty(i, j))
+                    if (!game.IsSquareEmpty(i, j))
                     {
                         if (displayReason)
                             Console.WriteLine("Illegal move. A piece is blocking the way.");
@@ -110,7 +110,7 @@ namespace chess
                     j += yStep;
                 }
                 // check if square is empty or has rival
-                if (board.IsSquareOpponent(xNew, yNew) || board.IsSquareEmpty(xNew, yNew))
+                if (game.IsSquareOpponent(xNew, yNew) || game.IsSquareEmpty(xNew, yNew))
                     return true;
                 if (displayReason)
                     Console.WriteLine("Illegal move. Can't take own piece.");
@@ -119,7 +119,7 @@ namespace chess
         }
         class Bishop : Piece
         {
-            public Bishop(Board board, bool isWhite) : base(board, isWhite ? 'B' : 'b', isWhite)
+            public Bishop(Game game, bool isWhite) : base(game, isWhite ? 'B' : 'b', isWhite)
             { }
             public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
             {
@@ -139,7 +139,7 @@ namespace chess
                 int i = xOld + xStep, j = yOld + yStep;
                 while (i < 8 && j < 8 && i != xNew)
                 {
-                    if (!board.IsSquareEmpty(i, j))
+                    if (!game.IsSquareEmpty(i, j))
                     {
                         if (displayReason)
                             Console.WriteLine("Illegal move. A piece is blocking the way.");
@@ -149,7 +149,7 @@ namespace chess
                     j += yStep;
                 }
                 // check if square is empty or has rival - make function in Piece
-                if (board.IsSquareOpponent(xNew, yNew) || board.IsSquareEmpty(xNew, yNew))
+                if (game.IsSquareOpponent(xNew, yNew) || game.IsSquareEmpty(xNew, yNew))
                     return true;
                 if (displayReason)
                     Console.WriteLine("Illegal move. Can't take own piece.");
@@ -158,7 +158,7 @@ namespace chess
         }
         class Queen : Piece
         {
-            public Queen(Board board, bool isWhite) : base(board, isWhite ? 'Q' : 'q', isWhite)
+            public Queen(Game game, bool isWhite) : base(game, isWhite ? 'Q' : 'q', isWhite)
             { }
             public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
             {
@@ -182,7 +182,7 @@ namespace chess
                 int i = xOld + xStep, j = yOld + yStep;
                 while (i < 8 && j < 8 && (i != xNew || j != yNew))
                 {
-                    if (!board.IsSquareEmpty(i, j))
+                    if (!game.IsSquareEmpty(i, j))
                     {
                         if (displayReason)
                             Console.WriteLine("Illegal move. A piece is blocking the way.");
@@ -192,7 +192,7 @@ namespace chess
                     j += yStep;
                 }
                 // check if square is empty or has rival
-                if (board.IsSquareOpponent(xNew, yNew) || board.IsSquareEmpty(xNew, yNew))
+                if (game.IsSquareOpponent(xNew, yNew) || game.IsSquareEmpty(xNew, yNew))
                     return true;
                 if (displayReason)
                     Console.WriteLine("Illegal move. Can't take own piece.");
@@ -201,17 +201,17 @@ namespace chess
         }
         class King : Piece
         {
-            public King(Board board, bool isWhite, int x, int y) : base(board, isWhite ? 'K' : 'k', isWhite)
+            public King(Game game, bool isWhite, int x, int y) : base(game, isWhite ? 'K' : 'k', isWhite)
             {
                 if (isWhite)
                 {
-                    board.setXWhiteKing(x);
-                    board.setYWhiteKing(y);
+                    game.setXWhiteKing(x);
+                    game.setYWhiteKing(y);
                 }
                 else
                 {
-                    board.setXBlackKing(x);
-                    board.setYBlackKing(y);
+                    game.setXBlackKing(x);
+                    game.setYBlackKing(y);
                 }
             }
             public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
@@ -220,22 +220,22 @@ namespace chess
                 if ((yOld - yNew == 2 && xOld == xNew))
                 {
                     // if can potentially castle long and not in check
-                    if (board.grid[isWhite ? 7 : 0, 0] != null && !board.IsKingInCheck(false, isWhite) && (isWhite ? board.canWhitePotentiallyCastleLong : board.canBlackPotentiallyCastleLong))
+                    if (game.board[isWhite ? 7 : 0, 0] != null && !game.IsKingInCheck(false, isWhite) && (isWhite ? game.canWhitePotentiallyCastleLong : game.canBlackPotentiallyCastleLong))
                     {
                         //if something is on the way or square is threatened
-                        if (board.grid[xOld, yOld - 1] != null || board.IsSquareThreatened(xOld, yOld - 1))
+                        if (game.board[xOld, yOld - 1] != null || game.IsSquareThreatened(xOld, yOld - 1))
                         {
                             if (displayReason)
                                 Console.WriteLine("Can't castle. A piece is in the way or square is threatened.");
                             return false;
                         }
-                        if (board.grid[xOld, yOld - 2] != null || board.IsSquareThreatened(xOld, yOld - 2))
+                        if (game.board[xOld, yOld - 2] != null || game.IsSquareThreatened(xOld, yOld - 2))
                         {
                             if (displayReason)
                                 Console.WriteLine("Can't castle. A piece is in the way or square is threatened.");
                             return false;
                         }
-                        if (board.grid[xOld, yOld - 3] != null)
+                        if (game.board[xOld, yOld - 3] != null)
                         {
                             if (displayReason)
                                 Console.WriteLine("Can't castle. A piece is in the way.");
@@ -251,16 +251,16 @@ namespace chess
                 else if ((yOld - yNew == -2 && xOld == xNew))
                 {
                     // if potentially can castle short and king not in check
-                    if (board.grid[isWhite ? 7 : 0, 7] != null && !board.IsKingInCheck(false, isWhite) && (isWhite ? board.canWhitePotentiallyCastleShort : board.canBlackPotentiallyCastleShort))
+                    if (game.board[isWhite ? 7 : 0, 7] != null && !game.IsKingInCheck(false, isWhite) && (isWhite ? game.canWhitePotentiallyCastleShort : game.canBlackPotentiallyCastleShort))
                     {
                         //if something is on the way or square is threatended
-                        if (board.grid[xOld, yOld + 1] != null || board.IsSquareThreatened(xOld, yOld + 1))
+                        if (game.board[xOld, yOld + 1] != null || game.IsSquareThreatened(xOld, yOld + 1))
                         {
                             if (displayReason)
                                 Console.WriteLine("Can't castle. A piece is in the way or square is threatened.");
                             return false;
                         }
-                        if (board.grid[xOld, yOld + 2] != null || board.IsSquareThreatened(xOld, yOld + 2))
+                        if (game.board[xOld, yOld + 2] != null || game.IsSquareThreatened(xOld, yOld + 2))
                         {
                             if (displayReason)
                                 Console.WriteLine("Can't castle. A piece is in the way or square is threatened.");
@@ -280,7 +280,7 @@ namespace chess
                     return false;
                 }
                 // check if square is empty or has rival
-                if (board.IsSquareOpponent(xNew, yNew) || board.IsSquareEmpty(xNew, yNew))
+                if (game.IsSquareOpponent(xNew, yNew) || game.IsSquareEmpty(xNew, yNew))
                     return true;
                 if (displayReason)
                     Console.WriteLine("Illegal move. Can't take own piece.");
@@ -289,7 +289,7 @@ namespace chess
         }
         class Pawn : Piece
         {
-            public Pawn(Board board, bool isWhite) : base(board, isWhite ? 'P' : 'p', isWhite)
+            public Pawn(Game game, bool isWhite) : base(game, isWhite ? 'P' : 'p', isWhite)
             { }
             public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
             {
@@ -302,13 +302,13 @@ namespace chess
                     // if sideways
                     if (Math.Abs(yNew - yOld) == 1)
                     {
-                        if (board.IsSquareOpponent(xNew, yNew))
+                        if (game.IsSquareOpponent(xNew, yNew))
                             return true;
                         //if attacking empty square
-                        if (board.IsSquareEmpty(xNew, yNew))
+                        if (game.IsSquareEmpty(xNew, yNew))
                         {
                             // if en passant availiable and pawn is attacking it
-                            if (board.getIsEnPassantAvailiable() && xNew == board.getEnPassantSquareX() && yNew == board.getEnPassantSquareY())
+                            if (game.getIsEnPassantAvailiable() && xNew == game.getEnPassantSquareX() && yNew == game.getEnPassantSquareY())
                                 return true;
                             else if (displayReason)
                                 Console.WriteLine("Illegal move. Can't attack empty square.");
@@ -321,9 +321,9 @@ namespace chess
                     // if up
                     else if (yNew - yOld == 0)
                     {
-                        if (board.IsSquareEmpty(xNew, yNew))
+                        if (game.IsSquareEmpty(xNew, yNew))
                             return true;
-                        if (board.IsSquareOpponent(xNew, yNew))
+                        if (game.IsSquareOpponent(xNew, yNew))
                         {
                             if (displayReason)
                                 Console.WriteLine("Illegal move. Pawns can't attack that way. Only sideways.");
@@ -341,13 +341,13 @@ namespace chess
                     if ((isWhite && xOld == 6) || (!isWhite && xOld == 1))
                     {
                         //if square on the way is empty
-                        if (board.IsSquareEmpty(xOld + xStep, yOld))
+                        if (game.IsSquareEmpty(xOld + xStep, yOld))
                         {
                             // if final square is empty
-                            if (board.IsSquareEmpty(xNew, yNew))
+                            if (game.IsSquareEmpty(xNew, yNew))
                                 return true;
                             // if final square has opponent
-                            if (board.IsSquareOpponent(xNew, yNew))
+                            if (game.IsSquareOpponent(xNew, yNew))
                             {
                                 if (displayReason)
                                     Console.WriteLine("Illegal move. Can't move pawn to opponents square.");
@@ -374,7 +374,7 @@ namespace chess
                     return "p";
             }
         }
-        class Board
+        class Game
         {
             public bool canWhitePotentiallyCastleLong = true, canWhitePotentiallyCastleShort = true, canBlackPotentiallyCastleLong = true, canBlackPotentiallyCastleShort = true;
             string input;
@@ -385,29 +385,29 @@ namespace chess
             bool currentTurnIsWhite = true;
             public string[] positionsArray = new string[101];
             int positionsArrayIndex = 0;
-            public Piece[,] grid = new Piece[8, 8];
-            public Board()
+            public Piece[,] board = new Piece[8, 8];
+            public Game()
             {
-                grid[0, 0] = new Rook(this, false);
-                grid[0, 1] = new Knight(this, false);
-                grid[0, 2] = new Bishop(this, false);
-                grid[0, 3] = new Queen(this, false);
-                grid[0, 4] = new King(this, false, 0, 4);
-                grid[0, 5] = new Bishop(this, false);
-                grid[0, 6] = new Knight(this, false);
-                grid[0, 7] = new Rook(this, false);
-                grid[7, 0] = new Rook(this, true);
-                grid[7, 1] = new Knight(this, true);
-                grid[7, 2] = new Bishop(this, true);
-                grid[7, 3] = new Queen(this, true);
-                grid[7, 4] = new King(this, true, 7, 4);
-                grid[7, 5] = new Bishop(this, true);
-                grid[7, 6] = new Knight(this, true);
-                grid[7, 7] = new Rook(this, true);
+                board[0, 0] = new Rook(this, false);
+                board[0, 1] = new Knight(this, false);
+                board[0, 2] = new Bishop(this, false);
+                board[0, 3] = new Queen(this, false);
+                board[0, 4] = new King(this, false, 0, 4);
+                board[0, 5] = new Bishop(this, false);
+                board[0, 6] = new Knight(this, false);
+                board[0, 7] = new Rook(this, false);
+                board[7, 0] = new Rook(this, true);
+                board[7, 1] = new Knight(this, true);
+                board[7, 2] = new Bishop(this, true);
+                board[7, 3] = new Queen(this, true);
+                board[7, 4] = new King(this, true, 7, 4);
+                board[7, 5] = new Bishop(this, true);
+                board[7, 6] = new Knight(this, true);
+                board[7, 7] = new Rook(this, true);
                 for (int j = 0; j < 8; j++)
-                    grid[1, j] = new Pawn(this, false);
+                    board[1, j] = new Pawn(this, false);
                 for (int j = 0; j < 8; j++)
-                    grid[6, j] = new Pawn(this, true);
+                    board[6, j] = new Pawn(this, true);
             }
             public int getEnPassantSquareX() { return enPassantSquareX; }
             public void setEnPassantSquareX(int x) { enPassantSquareX = x; }
@@ -429,17 +429,17 @@ namespace chess
                 xNew = int.Parse("" + input[2]);
                 yNew = int.Parse("" + input[3]);
             }
-            public void moveRookToCompleteOrReverseCastling(bool isReverse)
+            public void MoveRookToCompleteOrReverseCastling(bool isReverse)
             {
                 if (yOld - yNew == 2)
                 {
-                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 0 : 3)] = grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 3 : 0)];
-                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 3 : 0)] = null;
+                    board[(getCurrentTurn() ? 7 : 0), (isReverse ? 0 : 3)] = board[(getCurrentTurn() ? 7 : 0), (isReverse ? 3 : 0)];
+                    board[(getCurrentTurn() ? 7 : 0), (isReverse ? 3 : 0)] = null;
                 }
                 else if (yOld - yNew == -2)
                 {
-                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 7 : 5)] = grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 5 : 7)];
-                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 5 : 7)] = null;
+                    board[(getCurrentTurn() ? 7 : 0), (isReverse ? 7 : 5)] = board[(getCurrentTurn() ? 7 : 0), (isReverse ? 5 : 7)];
+                    board[(getCurrentTurn() ? 7 : 0), (isReverse ? 5 : 7)] = null;
                 }
             }
             public void UpdateKingPosition(int x, int y)
@@ -457,14 +457,58 @@ namespace chess
             }
             public void UpdateLastRemovedPiece(int x, int y)
             {
-                lastRemovedPiece = grid[x, y];
+                lastRemovedPiece = board[x, y];
                 lastRemovedPieceX = x;
                 lastRemovedPieceY = y;
+            }
+            public void UpdatePotentialCastlingRights()
+            {
+                // check king move and change move status of other rook to prevent 3 fold errors
+                if (board[xNew, yNew] is King)
+                {
+                    if (getCurrentTurn())
+                    {
+                        canWhitePotentiallyCastleLong = false;
+                        canWhitePotentiallyCastleShort = false;
+                    }
+                    else
+                    {
+                        canBlackPotentiallyCastleLong = false;
+                        canBlackPotentiallyCastleShort = false;
+                    }
+                }
+                // check if a rook moved, potential castling
+                if (board[xNew, yNew] is Rook)
+                {
+                    if (getCurrentTurn())
+                    {
+                        if (yOld == 0 && xOld == 7)
+                            canWhitePotentiallyCastleLong = false;
+                        else if (yOld == 7 && xOld == 7)
+                            canWhitePotentiallyCastleShort = false;
+                    }
+                    else
+                    {
+                        if (yOld == 0 && xOld == 0)
+                            canBlackPotentiallyCastleLong = false;
+                        else if (yOld == 7 && xOld == 0)
+                            canBlackPotentiallyCastleShort = false;
+                    }
+                }
+                // check if took rook while didn't move yet. for positions bugs
+                if (xNew == 0 && yNew == 0)
+                    canBlackPotentiallyCastleLong = false;
+                else if (xNew == 0 && yNew == 7)
+                    canBlackPotentiallyCastleShort = false;
+                else if (xNew == 7 && yNew == 0)
+                    canWhitePotentiallyCastleLong = false;
+                else if (xNew == 7 && yNew == 7)
+                    canWhitePotentiallyCastleShort = false;
             }
             public void PlayGame()
             {
                 printGrid();
-                addPositionStringToArray();
+                AddPositionStringToPositionsArray();
                 while (true)
                 {
                     Console.Write("Enter move: ");
@@ -478,75 +522,44 @@ namespace chess
                         continue;
                     }
                     ParseInputIntoAppropriateVariables();
-                    if (grid[xOld, yOld] == null)
+                    if (board[xOld, yOld] == null)
                     {
                         Console.WriteLine("Invalid move. No piece on square.");
                         continue;
                     }
-                    if (grid[xOld, yOld].isWhite != getCurrentTurn())
+                    if (board[xOld, yOld].isWhite != getCurrentTurn())
                     {
                         Console.WriteLine("Illegal move. Can't move opponent's pieces.");
                         continue;
                     }
                     // if move is legal
-                    if (grid[xOld, yOld].IsLegalMove(true, xOld, yOld, xNew, yNew))
+                    if (board[xOld, yOld].IsLegalMove(true, xOld, yOld, xNew, yNew))
                     {
                         bool enPassantIsAvailableBeforeMove = getIsEnPassantAvailiable();
                         int enPassantSquareXBeforeMove = getEnPassantSquareX(), enPassantSquareYBeforeMove = getEnPassantSquareY();
-                        makeMove(xOld, yOld, xNew, yNew);
+                        MakeMove(xOld, yOld, xNew, yNew);
                         // if king is in check - turn back
                         if (IsKingInCheck(false, getCurrentTurn()))
                         {
-                            reverseLastMove(xOld, yOld, xNew, yNew);
+                            ReverseLastMove(xOld, yOld, xNew, yNew);
                             SetEnPassantProperties(enPassantSquareXBeforeMove, enPassantSquareYBeforeMove, enPassantIsAvailableBeforeMove);
                             Console.WriteLine("Illegal move. Your king will be in check.");
                             continue;
                         }
-                        // check king move and change move status of other rook to prevent 3 fold errors
-                        if (grid[xNew, yNew] is King)
-                        {
-                            if (getCurrentTurn())
-                            {
-                                canWhitePotentiallyCastleLong = false;
-                                canWhitePotentiallyCastleShort = false;
-                            }
-                            else
-                            {
-                                canBlackPotentiallyCastleLong = false;
-                                canBlackPotentiallyCastleShort = false;
-                            }
-                        }
-                        // check if a rook moved, potential castling
-                        if (grid[xNew, yNew] is Rook)
-                        {
-                            if (getCurrentTurn())
-                            {
-                                if (yOld == 0 && xOld == 7)
-                                    canWhitePotentiallyCastleLong = false;
-                                else if (yOld == 7 && xOld == 7)
-                                    canWhitePotentiallyCastleShort = false;
-                            }
-                            else
-                            {
-                                if (yOld == 0 && xOld == 0)
-                                    canBlackPotentiallyCastleLong = false;
-                                else if (yOld == 7 && xOld == 0)
-                                    canBlackPotentiallyCastleShort = false;
-                            }
-                        }
-                        IsPawnNeedsPromotion(xNew, yNew);
+                        UpdatePotentialCastlingRights();
+                        AskIfPawnNeedsPromotionAndPromote(xNew, yNew);
                         switchCurrentTurn();
                         printGrid();
                         // if pawn move or piece taken
-                        if (getLastRemovedPiece() != null || grid[xNew, yNew] is Pawn)
+                        if (getLastRemovedPiece() != null || board[xNew, yNew] is Pawn)
                         {
                             // clear stringslist
                             positionsArray = new string[101];
-                            resetPositionArrayIndex();
+                            positionsArrayIndex = 0;
                         }
-                        addPositionStringToArray();
+                        AddPositionStringToPositionsArray();
                         //check if have no legal moves
-                        if (!areThereAnyLegalMoves(getCurrentTurn(), getIsEnPassantAvailiable(), getLastRemovedPieceX(), getLastRemovedPieceY()))
+                        if (!AreThereAnyLegalMoves(getCurrentTurn(), getIsEnPassantAvailiable(), getLastRemovedPieceX(), getLastRemovedPieceY()))
                         {
                             // check if king is in check after recent move
                             if (IsKingInCheck(false, getCurrentTurn()))
@@ -567,7 +580,7 @@ namespace chess
                             Console.WriteLine("Draw. Fifty moves without pawn move or taking a piece.");
                             break;
                         }
-                        if (countObjectsForDraw())
+                        if (IsInsufficientMaterial())
                         {
                             Console.WriteLine("Draw. Too few pieces to win.");
                             break;
@@ -577,8 +590,7 @@ namespace chess
                 }
                 Console.ReadLine();
             }
-            public void resetPositionArrayIndex() { positionsArrayIndex = 0; }
-            public bool countObjectsForDraw()
+            public bool IsInsufficientMaterial()
             {
                 int pawnCount = 0, rookCount = 0, queenCount = 0, knightCount = 0, bishopCount = 0;
                 int whiteBishopCountBlackSquare = 0, whiteBishopCountWhiteSquare = 0;
@@ -587,14 +599,14 @@ namespace chess
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        if (grid[i, j] is Pawn)
+                        if (board[i, j] is Pawn)
                             pawnCount++;
-                        else if (grid[i, j] is Rook)
+                        else if (board[i, j] is Rook)
                             rookCount++;
-                        else if (grid[i, j] is Bishop)
+                        else if (board[i, j] is Bishop)
                         {
                             bishopCount++;
-                            if (grid[i, j].isWhite)
+                            if (board[i, j].isWhite)
                             {
                                 if ((i + j) % 2 == 0)
                                     whiteBishopCountBlackSquare++;
@@ -609,9 +621,9 @@ namespace chess
                                     blackBishopCountWhiteSquare++;
                             }
                         }
-                        else if (grid[i, j] is Knight)
+                        else if (board[i, j] is Knight)
                             knightCount++;
-                        else if (grid[i, j] is Queen)
+                        else if (board[i, j] is Queen)
                             queenCount++;
                     }
                 }
@@ -624,20 +636,20 @@ namespace chess
                 }
                 return false;
             }
-            public bool IsPawnNeedsPromotion(int xNew, int yNew)
+            public bool AskIfPawnNeedsPromotionAndPromote(int xNew, int yNew)
             {
-                if (grid[xNew, yNew] is Pawn && (xNew == 7 || xNew == 0))
+                if (board[xNew, yNew] is Pawn && (xNew == 7 || xNew == 0))
                 {
                     Console.WriteLine("Which piece to promote to ?\n1.knight\n2.bishop\n3.rook\nelse.queen");
                     string askPromotion = Console.ReadLine();
                     if (askPromotion == "1")
-                        grid[xNew, yNew] = new Knight(this, getCurrentTurn());
+                        board[xNew, yNew] = new Knight(this, getCurrentTurn());
                     else if (askPromotion == "2")
-                        grid[xNew, yNew] = new Bishop(this, getCurrentTurn());
+                        board[xNew, yNew] = new Bishop(this, getCurrentTurn());
                     else if (askPromotion == "3")
-                        grid[xNew, yNew] = new Rook(this, getCurrentTurn());
+                        board[xNew, yNew] = new Rook(this, getCurrentTurn());
                     else
-                        grid[xNew, yNew] = new Queen(this, getCurrentTurn());
+                        board[xNew, yNew] = new Queen(this, getCurrentTurn());
                     return true;
                 }
                 return false;
@@ -646,7 +658,7 @@ namespace chess
             public void switchCurrentTurn() { currentTurnIsWhite = !currentTurnIsWhite; }
             public bool IsSquareOpponent(int x, int y)
             {
-                if (grid[x, y] != null && grid[x, y].isWhite != getCurrentTurn())
+                if (board[x, y] != null && board[x, y].isWhite != getCurrentTurn())
                     return true;
                 return false;
             }
@@ -660,10 +672,10 @@ namespace chess
                     k--;
                     for (int j = 0; j < 8; j++)
                     {
-                        if (grid[i, j] != null)
+                        if (board[i, j] != null)
                         {
-                            Console.Write(" {0}", grid[i, j].isWhite ? "W" : "B");
-                            Console.Write((grid[i, j].sign + " ").ToUpper());
+                            Console.Write(" {0}", board[i, j].isWhite ? "W" : "B");
+                            Console.Write((board[i, j].sign + " ").ToUpper());
                         }
                         else
                             Console.Write(" __ ");
@@ -678,62 +690,62 @@ namespace chess
             }
             public bool IsSquareEmpty(int x, int y)
             {
-                if (grid[x, y] == null)
+                if (board[x, y] == null)
                     return true;
                 return false;
             }
-            public void makeMove(int xOld, int yOld, int xNew, int yNew)
+            public void MakeMove(int xOld, int yOld, int xNew, int yNew)
             {
                 isEnPassantAvailiable = false;
                 UpdateLastRemovedPiece(xNew, yNew);
-                grid[xNew, yNew] = grid[xOld, yOld];
-                grid[xOld, yOld] = null;
+                board[xNew, yNew] = board[xOld, yOld];
+                board[xOld, yOld] = null;
                 //if is pawn
-                if (grid[xNew, yNew] is Pawn)
+                if (board[xNew, yNew] is Pawn)
                 {
                     //if did a double move
-                    if (xOld - xNew == (grid[xNew, yNew].isWhite ? 2 : -2))
+                    if (xOld - xNew == (board[xNew, yNew].isWhite ? 2 : -2))
                         SetEnPassantProperties(xNew + (getCurrentTurn() ? 1 : -1), yNew, true);
                     //if made attacking move(sideways) and attacked empty square - means it's en passant
                     else if (Math.Abs(yNew - yOld) == 1 && lastRemovedPiece == null)
                     {
                         UpdateLastRemovedPiece(xNew + (getCurrentTurn() ? 1 : -1), yNew);
-                        grid[xNew + (getCurrentTurn() ? 1 : -1), yNew] = null;
+                        board[xNew + (getCurrentTurn() ? 1 : -1), yNew] = null;
                     }
                 }
-                else if (grid[xNew, yNew] is King)
+                else if (board[xNew, yNew] is King)
                 {
                     UpdateKingPosition(xNew, yNew);
-                    if (grid[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
-                        moveRookToCompleteOrReverseCastling(false);
+                    if (board[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
+                        MoveRookToCompleteOrReverseCastling(false);
                 }
             }
-            public void reverseLastMove(int xOld, int yOld, int xNew, int yNew)
+            public void ReverseLastMove(int xOld, int yOld, int xNew, int yNew)
             {
-                grid[xOld, yOld] = grid[xNew, yNew];
-                grid[xNew, yNew] = lastRemovedPiece;
+                board[xOld, yOld] = board[xNew, yNew];
+                board[xNew, yNew] = lastRemovedPiece;
                 //if is pawn and if made attacking move(sideways) and attacked different square from last piece location - means it's an passant
-                if (grid[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1 && !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
+                if (board[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1 && !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
                 {
                     isEnPassantAvailiable = true;
-                    grid[xNew + (grid[xNew, yNew].isWhite ? -1 : 1), yNew] = lastRemovedPiece;
+                    board[xNew + (board[xNew, yNew].isWhite ? -1 : 1), yNew] = lastRemovedPiece;
                     lastRemovedPiece = null;
-                    grid[xNew, yNew] = null;
+                    board[xNew, yNew] = null;
                 }
-                else if (grid[xNew, yNew] is King)
+                else if (board[xNew, yNew] is King)
                 {
                     UpdateKingPosition(xOld, yOld);
-                    if (grid[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
-                        moveRookToCompleteOrReverseCastling(true);
+                    if (board[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
+                        MoveRookToCompleteOrReverseCastling(true);
                 }
             }
-            public void addPositionStringToArray()
+            public void AddPositionStringToPositionsArray()
             {
                 for (int i = 0; i < 8; i++)
                     for (int j = 0; j < 8; j++)
                     {
-                        if (grid[i, j] != null)
-                            positionsArray[positionsArrayIndex] += "" + grid[i, j].sign;
+                        if (board[i, j] != null)
+                            positionsArray[positionsArrayIndex] += "" + board[i, j].sign;
                         else
                             positionsArray[positionsArrayIndex] += " ";
                     }
@@ -770,7 +782,7 @@ namespace chess
             {
                 for (int i = 0; i < 8; i++)
                     for (int j = 0; j < 8; j++)
-                        if (grid[i, j] != null && grid[i, j].isWhite != getCurrentTurn() && grid[i, j].IsLegalMove(false, i, j, isWhite ? xWhiteKing : xBlackKing, isWhite ? yWhiteKing : yBlackKing))
+                        if (board[i, j] != null && board[i, j].isWhite != getCurrentTurn() && board[i, j].IsLegalMove(false, i, j, isWhite ? xWhiteKing : xBlackKing, isWhite ? yWhiteKing : yBlackKing))
                         {
                             if (displayReason)
                                 Console.WriteLine("{0} is in check.", getCurrentTurn() ? "white" : "black");
@@ -782,33 +794,33 @@ namespace chess
             {
                 for (int i = 0; i < 8; i++)
                     for (int j = 0; j < 8; j++)
-                        if (this.grid[i, j] != null && grid[i, j].isWhite != getCurrentTurn() && this.grid[i, j].IsLegalMove(false, i, j, x, y))
+                        if (this.board[i, j] != null && board[i, j].isWhite != getCurrentTurn() && this.board[i, j].IsLegalMove(false, i, j, x, y))
                             return true;
                 return false;
             }
-            public bool areThereAnyLegalMoves(bool isWhite, bool enPassantState, int lastPieceX, int lastPieceY)
+            public bool AreThereAnyLegalMoves(bool isWhite, bool enPassantState, int lastPieceX, int lastPieceY)
             {
                 // check every square
                 for (int i = 0; i < 8; i++)
                     for (int j = 0; j < 8; j++)
                         // if there is an opponent's piece on square
-                        if (grid[i, j] != null && this.grid[i, j].isWhite == isWhite)
+                        if (board[i, j] != null && this.board[i, j].isWhite == isWhite)
                             // check every possible square
                             for (int k = 0; k < 8; k++)
                                 for (int l = 0; l < 8; l++)
                                     // if legal move
-                                    if (grid[i, j].IsLegalMove(false, i, j, k, l))
+                                    if (board[i, j].IsLegalMove(false, i, j, k, l))
                                     {
-                                        makeMove(i, j, k, l);
+                                        MakeMove(i, j, k, l);
                                         // if king is not in check
                                         if (!IsKingInCheck(false, isWhite))
                                         {
-                                            reverseLastMove(i, j, k, l);
+                                            ReverseLastMove(i, j, k, l);
                                             isEnPassantAvailiable = enPassantState; // not sure 100% - meanwhile no bugs found ---- later update - check if needed or take out of reverse and make move
                                             UpdateLastRemovedPiece(lastPieceX, lastPieceY);
                                             return true;
                                         }
-                                        reverseLastMove(i, j, k, l);
+                                        ReverseLastMove(i, j, k, l);
                                         isEnPassantAvailiable = enPassantState; // not sure 100 % -meanwhile no bugs found
                                         UpdateLastRemovedPiece(lastPieceX, lastPieceY);
                                     }

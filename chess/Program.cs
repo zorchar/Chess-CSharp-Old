@@ -219,8 +219,8 @@ namespace chess
                 // if king wants to castle long (to move two squares left)
                 if ((yOld - yNew == 2 && xOld == xNew))
                 {
-                    // if king didn't move and rook didnt move and not in check
-                    if (!board.grid[xOld, yOld].didMove && board.grid[getIsWhite() ? 7 : 0, 0] != null && !board.grid[getIsWhite() ? 7 : 0, 0].didMove && !board.checkIfKingIsInCheck(false, getIsWhite()))
+                    // if can potentially castle long and not in check
+                    if (board.grid[isWhite ? 7 : 0, 0] != null && !board.IsKingInCheck(false, isWhite) && (isWhite ? board.canWhitePotentiallyCastleLong : board.canBlackPotentiallyCastleLong))
                     {
                         //if something is on the way or square is threatened
                         if (board.grid[xOld, yOld - 1] != null || board.IsSquareThreatened(xOld, yOld - 1))
@@ -250,8 +250,8 @@ namespace chess
                 // if king wants to castle short (to move two squares right)
                 else if ((yOld - yNew == -2 && xOld == xNew))
                 {
-                    // if king didn't move and rook didnt move and king not in check
-                    if (!board.grid[xOld, yOld].didMove && board.grid[getIsWhite() ? 7 : 0, 7] != null && !board.grid[getIsWhite() ? 7 : 0, 7].didMove && !board.checkIfKingIsInCheck(false, getIsWhite()))
+                    // if potentially can castle short and king not in check
+                    if (board.grid[isWhite ? 7 : 0, 7] != null && !board.IsKingInCheck(false, isWhite) && (isWhite ? board.canWhitePotentiallyCastleShort : board.canBlackPotentiallyCastleShort))
                     {
                         //if something is on the way or square is threatended
                         if (board.grid[xOld, yOld + 1] != null || board.IsSquareThreatened(xOld, yOld + 1))
@@ -376,6 +376,7 @@ namespace chess
         }
         class Board
         {
+            public bool canWhitePotentiallyCastleLong = true, canWhitePotentiallyCastleShort = true, canBlackPotentiallyCastleLong = true, canBlackPotentiallyCastleShort = true;
             string input;
             int xOld, yOld, xNew, yNew;
             int enPassantSquareX, enPassantSquareY, lastRemovedPieceX, lastRemovedPieceY, xWhiteKing, yWhiteKing, xBlackKing, yBlackKing;
@@ -387,7 +388,6 @@ namespace chess
             public Piece[,] grid = new Piece[8, 8];
             public Board()
             {
-                /*
                 grid[0, 0] = new Rook(this, false);
                 grid[0, 1] = new Knight(this, false);
                 grid[0, 2] = new Bishop(this, false);
@@ -408,12 +408,6 @@ namespace chess
                     grid[1, j] = new Pawn(this, false);
                 for (int j = 0; j < 8; j++)
                     grid[6, j] = new Pawn(this, true);
-                */
-                grid[7, 4] = new King(this, true, 7, 4);
-                grid[0, 4] = new King(this, false, 0, 4);
-                grid[4, 5] = new Pawn(this, false);
-                grid[6, 4] = new Pawn(this, true);
-
             }
             public int getEnPassantSquareX() { return enPassantSquareX; }
             public void setEnPassantSquareX(int x) { enPassantSquareX = x; }
@@ -434,6 +428,38 @@ namespace chess
                 yOld = int.Parse("" + input[1]);
                 xNew = int.Parse("" + input[2]);
                 yNew = int.Parse("" + input[3]);
+            }
+            public void moveRookToCompleteOrReverseCastling(bool isReverse)
+            {
+                if (yOld - yNew == 2)
+                {
+                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 0 : 3)] = grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 3 : 0)];
+                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 3 : 0)] = null;
+                }
+                else if (yOld - yNew == -2)
+                {
+                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 7 : 5)] = grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 5 : 7)];
+                    grid[(getCurrentTurn() ? 7 : 0), (isReverse ? 5 : 7)] = null;
+                }
+            }
+            public void UpdateKingPosition(int x, int y)
+            {
+                if (getCurrentTurn())
+                {
+                    xWhiteKing = x;
+                    yWhiteKing = y;
+                }
+                else
+                {
+                    xBlackKing = x;
+                    yBlackKing = y;
+                }
+            }
+            public void UpdateLastRemovedPiece(int x, int y)
+            {
+                lastRemovedPiece = grid[x, y];
+                lastRemovedPieceX = x;
+                lastRemovedPieceY = y;
             }
             public void PlayGame()
             {
@@ -493,12 +519,22 @@ namespace chess
                         // check if a rook moved, potential castling
                         if (grid[xNew, yNew] is Rook)
                         {
-                            if (((grid[(grid[xNew, yNew].isWhite ? 7 : 0), 0] != null && grid[(grid[xNew, yNew].isWhite ? 7 : 0), 0].didMove == true) || grid[(grid[xNew, yNew].isWhite ? 7 : 0), 0] == null) && ((grid[(grid[xNew, yNew].isWhite ? 7 : 0), 7] != null && grid[(grid[xNew, yNew].isWhite ? 7 : 0), 7].didMove == true) || grid[(grid[xNew, yNew].isWhite ? 7 : 0), 7] == null))
-                                if (grid[(grid[xNew, yNew].isWhite ? 7 : 0), 4] != null)
-                                    grid[(grid[xNew, yNew].isWhite ? 7 : 0), 4].didMove = true;
+                            if (getCurrentTurn())
+                            {
+                                if (yOld == 0 && xOld == 7)
+                                    canWhitePotentiallyCastleLong = false;
+                                else if (yOld == 7 && xOld == 7)
+                                    canWhitePotentiallyCastleShort = false;
+                            }
+                            else
+                            {
+                                if (yOld == 0 && xOld == 0)
+                                    canBlackPotentiallyCastleLong = false;
+                                else if (yOld == 7 && xOld == 0)
+                                    canBlackPotentiallyCastleShort = false;
+                            }
                         }
-                        grid[xNew, yNew].didMove = true;
-                        checkChangePromotion(xNew, yNew);
+                        IsPawnNeedsPromotion(xNew, yNew);
                         switchCurrentTurn();
                         printGrid();
                         // if pawn move or piece taken
@@ -661,113 +697,34 @@ namespace chess
                     //if made attacking move(sideways) and attacked empty square - means it's en passant
                     else if (Math.Abs(yNew - yOld) == 1 && lastRemovedPiece == null)
                     {
-                        enPassantAvailiable = true;
-                        enPassantSquareX = xNew + (grid[xOld, yOld].isWhite ? 1 : -1);
-                        enPassantSquareY = yNew;
-                        grid[xNew, yNew] = grid[xOld, yOld];
-                        grid[xOld, yOld] = null;
-                        return;
-                    }
-                    //if made attacking move(sideways)
-                    else if (Math.Abs(yNew - yOld) == 1)
-                        //if attacked empty square - means it's en passant
-                        if (grid[xNew, yNew] == null)
-                        {
-                            lastRemovedPiece = grid[xNew + (grid[xOld, yOld].isWhite ? 1 : -1), yNew];
-                            lastRemovedPieceX = xNew + (grid[xOld, yOld].isWhite ? 1 : -1);
-                            grid[xNew + (grid[xOld, yOld].isWhite ? 1 : -1), yNew] = null;
-                            enPassantAvailiable = false;
-                        }
-                }
-                else if (grid[xOld, yOld].sign == 'K')
-                {
-                    xWhiteKing = xNew;
-                    yWhiteKing = yNew;
-                    //added stuff for castling
-                    //if long castle
-                    if (yOld - yNew == 2)
-                    {
-                        grid[7, 3] = grid[7, 0];
-                        grid[7, 0] = null;
-                    }
-                    //if short castle
-                    else if (yOld - yNew == -2)
-                    {
-                        grid[7, 5] = grid[7, 7];
-                        grid[7, 7] = null;
+                        UpdateLastRemovedPiece(xNew + (getCurrentTurn() ? 1 : -1), yNew);
+                        grid[xNew + (getCurrentTurn() ? 1 : -1), yNew] = null;
                     }
                 }
-                else if (grid[xOld, yOld].sign == 'k')
+                else if (grid[xNew, yNew] is King)
                 {
-                    xBlackKing = xNew;
-                    yBlackKing = yNew;
-                    //added stuff for castling
-                    //if long castle
-                    if (yOld - yNew == 2)
-                    {
-                        grid[0, 3] = grid[0, 0];
-                        grid[0, 0] = null;
-                    }
-                    //if short castle
-                    else if (yOld - yNew == -2)
-                    {
-                        grid[0, 5] = grid[0, 7];
-                        grid[0, 7] = null;
-                    }
+                    UpdateKingPosition(xNew, yNew);
+                    if (grid[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
+                        moveRookToCompleteOrReverseCastling(false);
                 }
             }
             public void reverseLastMove(int xOld, int yOld, int xNew, int yNew)
             {
-                //added stuff for an passant
-                //if is pawn and if made attacking move(sideways)
-                if (grid[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1)
+                grid[xOld, yOld] = grid[xNew, yNew];
+                grid[xNew, yNew] = lastRemovedPiece;
+                //if is pawn and if made attacking move(sideways) and attacked different square from last piece location - means it's an passant
+                if (grid[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1 && !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
                 {
-                    //if attacked different square from last piece                     location - means it's an passant
-                    if (!(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
-                    {
-                        enPassantAvailiable = true;
-                        grid[xNew + (grid[xNew, yNew].isWhite ? 1 : -1), yNew] = lastRemovedPiece;
-                        grid[xOld, yOld] = grid[xNew, yNew];
-                        grid[xNew, yNew] = null;
-                        return;
-                    }
+                    isEnPassantAvailiable = true;
+                    grid[xNew + (grid[xNew, yNew].isWhite ? -1 : 1), yNew] = lastRemovedPiece;
+                    lastRemovedPiece = null;
+                    grid[xNew, yNew] = null;
                 }
-                // if white king
-                else if (grid[xNew, yNew].sign == 'K')
+                else if (grid[xNew, yNew] is King)
                 {
-                    xWhiteKing = xOld;
-                    yWhiteKing = yOld;
-                    //added stuff for castling
-                    //if long castle
-                    if (yOld - yNew == 2)
-                    {
-                        grid[7, 0] = grid[7, 3];
-                        grid[7, 3] = null;
-                    }
-                    //if short castle
-                    else if (yOld - yNew == -2)
-                    {
-                        grid[7, 7] = grid[7, 5];
-                        grid[7, 5] = null;
-                    }
-                }
-                else if (grid[xNew, yNew].sign == 'k')
-                {
-                    xBlackKing = xOld;
-                    yBlackKing = yOld;
-                    //added stuff for castling
-                    //if long castle
-                    if (yOld - yNew == 2)
-                    {
-                        grid[0, 0] = grid[0, 3];
-                        grid[0, 3] = null;
-                    }
-                    //if short castle
-                    else if (yOld - yNew == -2)
-                    {
-                        grid[0, 7] = grid[0, 5];
-                        grid[0, 5] = null;
-                    }
+                    UpdateKingPosition(xOld, yOld);
+                    if (grid[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
+                        moveRookToCompleteOrReverseCastling(true);
                 }
             }
             public void addPositionStringToArray()
@@ -780,35 +737,11 @@ namespace chess
                         else
                             positionsArray[positionsArrayIndex] += " ";
                     }
-                // add en passant state
-                positionsArray[positionsArrayIndex] += "" + (this.enPassantAvailiable ? 'y' : 'n');
-                // add kings states
-                if (grid[7, 4] != null && grid[7, 4] is King && !grid[7, 4].didMove)
-                    positionsArray[positionsArrayIndex] += "" + 'n';
-                else
-                    positionsArray[positionsArrayIndex] += "" + 'y';
-                if (grid[0, 4] != null && grid[0, 4] is King && !grid[0, 4].didMove)
-                    positionsArray[positionsArrayIndex] += "" + 'n';
-                else
-                    positionsArray[positionsArrayIndex] += "" + 'y';
-                // add rooks states
-                if (grid[7, 0] != null && grid[7, 0].isWhite && !grid[7, 0].didMove)
-                    positionsArray[positionsArrayIndex] += "" + 'n';
-                else
-                    positionsArray[positionsArrayIndex] += "" + 'y';
-                if (grid[0, 0] != null && !grid[0, 0].isWhite && !grid[0, 0].didMove)
-                    positionsArray[positionsArrayIndex] += "" + 'n';
-                else
-                    positionsArray[positionsArrayIndex] += "" + 'y';
-                if (grid[7, 7] != null && grid[7, 7].isWhite && !grid[7, 7].didMove)
-                    positionsArray[positionsArrayIndex] += "" + 'n';
-                else
-                    positionsArray[positionsArrayIndex] += "" + 'y';
-                if (grid[0, 7] != null && !grid[0, 7].isWhite && !grid[0, 7].didMove)
-                    positionsArray[positionsArrayIndex] += "" + 'n';
-                else
-                    positionsArray[positionsArrayIndex] += "" + 'y';
-                // add which turn
+                positionsArray[positionsArrayIndex] += (this.isEnPassantAvailiable ? 'y' : 'n');
+                positionsArray[positionsArrayIndex] += (canBlackPotentiallyCastleLong ? 'y' : 'n');
+                positionsArray[positionsArrayIndex] += (canBlackPotentiallyCastleShort ? 'y' : 'n');
+                positionsArray[positionsArrayIndex] += (canWhitePotentiallyCastleLong ? 'y' : 'n');
+                positionsArray[positionsArrayIndex] += (canWhitePotentiallyCastleShort ? 'y' : 'n');
                 positionsArray[positionsArrayIndex] += (getCurrentTurn() ? 'w' : 'b');
                 // add to posision index
                 positionsArrayIndex++;

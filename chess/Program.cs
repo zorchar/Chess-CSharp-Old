@@ -44,25 +44,22 @@ namespace chess
     }
     class Piece
     {
-        readonly char sign;
         readonly bool isWhite;
         readonly ChessGame game;
         public Piece() { }
-        public Piece(ChessGame game, char sign, bool isWhite)
+        public Piece(ChessGame game, bool isWhite)
         {
             this.game = game;
-            this.sign = sign;
             this.isWhite = isWhite;
         }
         public virtual bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         { return true; }
-        public char GetPieceSign() { return sign; }
         public bool GetIsWhite() { return isWhite; }
         public ChessGame GetGame() { return game; }
     }
     class Knight : Piece
     {
-        public Knight(ChessGame game, bool isWhite) : base(game, isWhite ? 'N' : 'n', isWhite) { }
+        public Knight(ChessGame game, bool isWhite) : base(game, isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if knight can move that way
@@ -79,10 +76,17 @@ namespace chess
                 Console.WriteLine("Illegal move. Can't take own piece.");
             return false;
         }
+        public override string ToString()
+        {
+            if (GetIsWhite())
+                return "N";
+            else
+                return "n";
+        }
     }
     class Rook : Piece
     {
-        public Rook(ChessGame game, bool isWhite) : base(game, isWhite ? 'R' : 'r', isWhite) { }
+        public Rook(ChessGame game, bool isWhite) : base(game, isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if rook can move that way
@@ -121,10 +125,17 @@ namespace chess
                 Console.WriteLine("Illegal move. Can't take own piece.");
             return false;
         }
+        public override string ToString()
+        {
+            if (GetIsWhite())
+                return "R";
+            else
+                return "r";
+        }
     }
     class Bishop : Piece
     {
-        public Bishop(ChessGame game, bool isWhite) : base(game, isWhite ? 'B' : 'b', isWhite) { }
+        public Bishop(ChessGame game, bool isWhite) : base(game, isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if bishop can move that way
@@ -159,10 +170,17 @@ namespace chess
                 Console.WriteLine("Illegal move. Can't take own piece.");
             return false;
         }
+        public override string ToString()
+        {
+            if (GetIsWhite())
+                return "B";
+            else
+                return "b";
+        }
     }
     class Queen : Piece
     {
-        public Queen(ChessGame game, bool isWhite) : base(game, isWhite ? 'Q' : 'q', isWhite) { }
+        public Queen(ChessGame game, bool isWhite) : base(game, isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             Bishop queenAsBishop = new Bishop(GetGame(), GetIsWhite());
@@ -173,10 +191,17 @@ namespace chess
                 Console.WriteLine("Queen can't move there.");
             return false;
         }
+        public override string ToString()
+        {
+            if (GetIsWhite())
+                return "Q";
+            else
+                return "q";
+        }
     }
     class King : Piece
     {
-        public King(ChessGame game, bool isWhite, int x, int y) : base(game, isWhite ? 'K' : 'k', isWhite)
+        public King(ChessGame game, bool isWhite, int x, int y) : base(game, isWhite)
         {
             if (isWhite)
             {
@@ -261,16 +286,23 @@ namespace chess
                 Console.WriteLine("Illegal move. Can't take own piece.");
             return false;
         }
+        public override string ToString()
+        {
+            if (GetIsWhite())
+                return "K";
+            else
+                return "k";
+        }
     }
     class Pawn : Piece
     {
-        public Pawn(ChessGame game, bool isWhite) : base(game, isWhite ? 'P' : 'p', isWhite) { }
+        public Pawn(ChessGame game, bool isWhite) : base(game, isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
-            // if walked one square up
             int xStep = 1;
             if (GetIsWhite())
                 xStep = -1;
+            // if walked one square up
             if (xNew - xOld == xStep)
             {
                 // if sideways
@@ -339,6 +371,13 @@ namespace chess
             if (displayReason)
                 Console.WriteLine("Illegal move. Pawns don't move that way.");
             return false;
+        }
+        public override string ToString()
+        {
+            if (GetIsWhite())
+                return "P";
+            else
+                return "p";
         }
     }
     class ChessGame
@@ -495,7 +534,7 @@ namespace chess
                 return;
             }
         }
-        public bool IsGameNeedsToEnd()
+        public bool IsGameOver()
         {
             if (!AreThereAnyLegalMoves(isCurrentTurnWhite, isEnPassantAvailiable, lastRemovedPieceX, lastRemovedPieceY))
             {
@@ -546,7 +585,10 @@ namespace chess
                         continue;
                     }
                     UpdatePotentialCastlingRights();
-                    IsPawnNeedsPromotionPlusPromote(xNew, yNew);
+                    if (board[xNew, yNew] is Pawn && (xNew == 7 || xNew == 0))
+                    {
+                        Promote(xNew, yNew);
+                    }
                     isCurrentTurnWhite = !isCurrentTurnWhite;
                     PrintBoard();
                     if (lastRemovedPiece != null || board[xNew, yNew] is Pawn)
@@ -555,7 +597,7 @@ namespace chess
                         positionsArrayIndex = 0;
                     }
                     AddPositionStringToPositionsArray();
-                    if (IsGameNeedsToEnd())
+                    if (IsGameOver())
                         break;
                     IsKingInCheck(true, isCurrentTurnWhite);
                 }
@@ -599,23 +641,18 @@ namespace chess
                 return true;
             return false;
         }
-        public bool IsPawnNeedsPromotionPlusPromote(int xNew, int yNew)
+        public void Promote(int xNew, int yNew)
         {
-            if (board[xNew, yNew] is Pawn && (xNew == 7 || xNew == 0))
-            {
                 Console.WriteLine("Which piece to promote to ?\n1.knight\n2.bishop\n3.rook\nelse.queen");
-                string askPromotion = Console.ReadLine();
-                if (askPromotion == "1")
+                string whichPiece = Console.ReadLine();
+                if (whichPiece == "1")
                     board[xNew, yNew] = new Knight(this, isCurrentTurnWhite);
-                else if (askPromotion == "2")
+                else if (whichPiece == "2")
                     board[xNew, yNew] = new Bishop(this, isCurrentTurnWhite);
-                else if (askPromotion == "3")
+                else if (whichPiece == "3")
                     board[xNew, yNew] = new Rook(this, isCurrentTurnWhite);
                 else
                     board[xNew, yNew] = new Queen(this, isCurrentTurnWhite);
-                return true;
-            }
-            return false;
         }
         public bool IsSquareOpponent(int xOld, int yOld, int xNew, int yNew)
         {
@@ -636,7 +673,7 @@ namespace chess
                     if (board[i, j] != null)
                     {
                         Console.Write(" {0}", board[i, j].GetIsWhite() ? "W" : "B");
-                        Console.Write((board[i, j].GetPieceSign() + " ").ToUpper());
+                        Console.Write((board[i, j].ToString() + " ").ToUpper());
                     }
                     else
                         Console.Write(" __ ");
@@ -705,7 +742,7 @@ namespace chess
                 for (int j = 0; j < 8; j++)
                 {
                     if (board[i, j] != null)
-                        positionsArray[positionsArrayIndex] += "" + board[i, j].GetPieceSign();
+                        positionsArray[positionsArrayIndex] += "" + board[i, j].ToString();
                     else
                         positionsArray[positionsArrayIndex] += " ";
                 }

@@ -5,36 +5,36 @@ namespace chess
     {
         static void Main()
         {
-            new Game().PlayGame();
+            new ChessGame().PlayGame();
         }
     }
-    class AuxiliaryMethod
+    class UtilityMethod
     {
-        public static bool IsInputValid(string input)
+        public static bool IsValidInput(string input)
         {
             input = input.Trim();
             if (input.Length != 4)
                 return false;
-            if (!((input[0] >= 65 && input[0] <= 72) || (input[0] >= 97 && input[0] <= 104)))
+            if (!((input[0] >= 'A' && input[0] <= 72) || (input[0] >= 97 && input[0] <= 104)))
                 return false;
-            if (!((input[1] >= 49 && input[1] <= 56)))
+            if (!((input[1] >= '1' && input[1] <= 56)))
                 return false;
-            if (!((input[2] >= 65 && input[2] <= 72) || (input[2] >= 97 && input[2] <= 104)))
+            if (!((input[2] >= 'A' && input[2] <= 72) || (input[2] >= 97 && input[2] <= 104)))
                 return false;
-            if (!((input[3] >= 49 && input[3] <= 56)))
+            if (!((input[3] >= '1' && input[3] <= 56)))
                 return false;
             return true;
         }
-        public static string TrimInputAndChangeToUsableFormat(string input)
+        public static string ProcessInputIntoUsableFormat(string input)
         {
             input = input.Trim();
             string changedInput = "";
-            changedInput += ('8') - (input[1]);
+            changedInput += '8' - input[1];
             if (input[0] >= 65 && input[0] <= 72)
                 changedInput += (char)(input[0] - 17);
             else if (input[0] >= 97 && input[0] <= 104)
                 changedInput += (char)(input[0] - 49);
-            changedInput += ('8') - (input[3]);
+            changedInput += '8' - input[3];
             if (input[2] >= 65 && input[2] <= 72)
                 changedInput += (char)(input[2] - 17);
             else if (input[2] >= 97 && input[2] <= 104)
@@ -46,9 +46,9 @@ namespace chess
     {
         readonly char sign;
         readonly bool isWhite;
-        readonly Game game;
+        readonly ChessGame game;
         public Piece() { }
-        public Piece(Game game, char sign, bool isWhite)
+        public Piece(ChessGame game, char sign, bool isWhite)
         {
             this.game = game;
             this.sign = sign;
@@ -58,11 +58,11 @@ namespace chess
         { return true; }
         public char GetPieceSign() { return sign; }
         public bool GetIsWhite() { return isWhite; }
-        public Game GetGame() { return game; }
+        public ChessGame GetGame() { return game; }
     }
     class Knight : Piece
     {
-        public Knight(Game game, bool isWhite) : base(game, isWhite ? 'N' : 'n', isWhite)
+        public Knight(ChessGame game, bool isWhite) : base(game, isWhite ? 'N' : 'n', isWhite)
         { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
@@ -83,8 +83,7 @@ namespace chess
     }
     class Rook : Piece
     {
-        public Rook(Game game, bool isWhite) : base(game, isWhite ? 'R' : 'r', isWhite)
-        { }
+        public Rook(ChessGame game, bool isWhite) : base(game, isWhite ? 'R' : 'r', isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if rook can move that way
@@ -126,7 +125,7 @@ namespace chess
     }
     class Bishop : Piece
     {
-        public Bishop(Game game, bool isWhite) : base(game, isWhite ? 'B' : 'b', isWhite)
+        public Bishop(ChessGame game, bool isWhite) : base(game, isWhite ? 'B' : 'b', isWhite)
         { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
@@ -165,7 +164,7 @@ namespace chess
     }
     class Queen : Piece
     {
-        public Queen(Game game, bool isWhite) : base(game, isWhite ? 'Q' : 'q', isWhite)
+        public Queen(ChessGame game, bool isWhite) : base(game, isWhite ? 'Q' : 'q', isWhite)
         { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
@@ -180,7 +179,7 @@ namespace chess
     }
     class King : Piece
     {
-        public King(Game game, bool isWhite, int x, int y) : base(game, isWhite ? 'K' : 'k', isWhite)
+        public King(ChessGame game, bool isWhite, int x, int y) : base(game, isWhite ? 'K' : 'k', isWhite)
         {
             if (isWhite)
             {
@@ -268,7 +267,7 @@ namespace chess
     }
     class Pawn : Piece
     {
-        public Pawn(Game game, bool isWhite) : base(game, isWhite ? 'P' : 'p', isWhite)
+        public Pawn(ChessGame game, bool isWhite) : base(game, isWhite ? 'P' : 'p', isWhite)
         { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
@@ -346,7 +345,7 @@ namespace chess
             return false;
         }
     }
-    class Game
+    class ChessGame
     {
         bool canWhitePotentiallyCastleLong = true, canWhitePotentiallyCastleShort = true, canBlackPotentiallyCastleLong = true, canBlackPotentiallyCastleShort = true;
         string input;
@@ -355,16 +354,8 @@ namespace chess
         Piece lastRemovedPiece;
         string[] positionsArray = new string[101];
         readonly Piece[,] board = new Piece[8, 8];
-        public Game()
+        public ChessGame()
         {
-            board[0, 3] = new Rook(this, false);
-            board[0, 4] = new King(this, false, 0, 4);
-            board[0, 7] = new Rook(this, false);
-            board[7, 0] = new Rook(this, true);
-            board[7, 4] = new King(this, true, 7, 4);
-            board[7, 7] = new Rook(this, true);
-
-            /*
             board[0, 0] = new Rook(this, false);
             board[0, 1] = new Knight(this, false);
             board[0, 2] = new Bishop(this, false);
@@ -384,7 +375,7 @@ namespace chess
             for (int j = 0; j < 8; j++)
                 board[1, j] = new Pawn(this, false);
             for (int j = 0; j < 8; j++)
-                board[6, j] = new Pawn(this, true);*/
+                board[6, j] = new Pawn(this, true);
         }
         public Piece[,] GetBoard() { return board; }
         public bool GetCanWhitePotentiallyCastleLong() { return canWhitePotentiallyCastleLong; }
@@ -488,12 +479,12 @@ namespace chess
                 Console.Write("Enter move: ");
                 input = Console.ReadLine();
                 Console.WriteLine();
-                if (!AuxiliaryMethod.IsInputValid(input))
+                if (!UtilityMethod.IsValidInput(input))
                 {
                     Console.WriteLine("Invalid input.");
                     continue;
                 }
-                input = AuxiliaryMethod.TrimInputAndChangeToUsableFormat(input);
+                input = UtilityMethod.ProcessInputIntoUsableFormat(input);
                 ParseInputIntoAppropriateVariables();
                 if (board[xOld, yOld] == null)
                 {

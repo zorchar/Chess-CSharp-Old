@@ -62,8 +62,7 @@ namespace chess
     }
     class Knight : Piece
     {
-        public Knight(ChessGame game, bool isWhite) : base(game, isWhite ? 'N' : 'n', isWhite)
-        { }
+        public Knight(ChessGame game, bool isWhite) : base(game, isWhite ? 'N' : 'n', isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if knight can move that way
@@ -125,8 +124,7 @@ namespace chess
     }
     class Bishop : Piece
     {
-        public Bishop(ChessGame game, bool isWhite) : base(game, isWhite ? 'B' : 'b', isWhite)
-        { }
+        public Bishop(ChessGame game, bool isWhite) : base(game, isWhite ? 'B' : 'b', isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if bishop can move that way
@@ -164,8 +162,7 @@ namespace chess
     }
     class Queen : Piece
     {
-        public Queen(ChessGame game, bool isWhite) : base(game, isWhite ? 'Q' : 'q', isWhite)
-        { }
+        public Queen(ChessGame game, bool isWhite) : base(game, isWhite ? 'Q' : 'q', isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             Bishop queenAsBishop = new Bishop(GetGame(), GetIsWhite());
@@ -267,8 +264,7 @@ namespace chess
     }
     class Pawn : Piece
     {
-        public Pawn(ChessGame game, bool isWhite) : base(game, isWhite ? 'P' : 'p', isWhite)
-        { }
+        public Pawn(ChessGame game, bool isWhite) : base(game, isWhite ? 'P' : 'p', isWhite) { }
         public override bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         {
             // if walked one square up

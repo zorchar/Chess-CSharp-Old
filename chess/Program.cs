@@ -15,13 +15,11 @@ namespace chess
             input = input.Trim();
             if (input.Length != 4)
                 return false;
-            if (!((input[0] >= 65 && input[0] <= 72) || (input[0] >=
-97 && input[0] <= 104)))
+            if (!((input[0] >= 65 && input[0] <= 72) || (input[0] >= 97 && input[0] <= 104)))
                 return false;
             if (!((input[1] >= 49 && input[1] <= 56)))
                 return false;
-            if (!((input[2] >= 65 && input[2] <= 72) || (input[2] >=
-97 && input[2] <= 104)))
+            if (!((input[2] >= 65 && input[2] <= 72) || (input[2] >= 97 && input[2] <= 104)))
                 return false;
             if (!((input[3] >= 49 && input[3] <= 56)))
                 return false;
@@ -56,8 +54,7 @@ namespace chess
             this.sign = sign;
             this.isWhite = isWhite;
         }
-        public virtual bool IsLegalMove(bool displayReason, int xOld,
-int yOld, int xNew, int yNew)
+        public virtual bool IsLegalMove(bool displayReason, int xOld, int yOld, int xNew, int yNew)
         { return true; }
         public char GetPieceSign() { return sign; }
         public bool GetIsWhite() { return isWhite; }

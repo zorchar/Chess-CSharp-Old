@@ -698,14 +698,14 @@ namespace chess
             board[xOld, yOld] = board[xNew, yNew];
             board[xNew, yNew] = lastRemovedPiece;
             //if is pawn and if made attacking move(sideways) and attacked different square from last piece location - means it's an passant
-            if (board[xNew, yNew] is Pawn && Math.Abs(yNew - yOld) == 1 && !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
+            if (board[xOld, yOld] is Pawn && Math.Abs(yNew - yOld) == 1 && !(xNew == lastRemovedPieceX && yNew == lastRemovedPieceY))
             {
                 isEnPassantAvailiable = true;
                 board[xNew + (board[xNew, yNew].GetIsWhite() ? -1 : 1), yNew] = lastRemovedPiece;
                 lastRemovedPiece = null;
                 board[xNew, yNew] = null;
             }
-            else if (board[xNew, yNew] is King)
+            else if (board[xOld, yOld] is King)
             {
                 UpdateKingPosition(xOld, yOld);
                 if (board[xNew, yNew] is King && Math.Abs(yOld - yNew) == 2)
